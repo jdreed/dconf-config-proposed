@@ -32,13 +32,16 @@ if [ -f /etc/dconf/profile/user ] && [ "$DEBATHENA_HOME_TYPE" = afs ]; then
     dirname="$HOME/.config/dconf"
     if [ "$dbname" != "user" ] && ! [ -e "$dirname/$dbname" ]; then
 	find_candidates
+	copied=0
 	for c in $CANDIDATES; do
 	    if [ -f "$dirname/user.$c" ]; then
 		cp "$dirname/user.$c" "$dirname/$dbname"
+		copied=1
 		break
 	    fi
 	done
-	# If we don't end up copying anything, then the user just gets the
-	# defaults, which is fine.
+	if [ $copied -eq 0 ] && [ -f "$dirname/user" ]; then
+	    cp "$dirname/user" "$dirname/$dbname"
+	fi
     fi
 fi
