@@ -1,0 +1,44 @@
+find_candidates() {
+    case "$(lsb_release -si)" in
+	Ubuntu)
+	    SEARCH="utopic trusty saucy raring quantal precise"
+	    ;;
+	Debian)
+	    SEARCH="jessie wheezy"
+	    ;;
+	*)
+	    SEARCH=
+	    ;;
+	esac
+    looking=0
+    CANDIDATES=
+    for s in $SEARCH; do
+	# Do not consider anything that is newer than the current release
+	if [ "$(lsb_release -sc)" == "$s" ]; then
+	    looking=1
+	    # Do not consider the current release, since that's what we
+	    # need to populate
+	    continue
+	fi
+	if [ $looking -eq 1 ]; then
+	    CANDIDATES="$CANDIDATES $s"
+	fi
+    done
+}
+	
+
+if [ -f /etc/dconf/profile/user ] && [ "$DEBATHENA_HOME_TYPE" = afs ]; then
+    dbname=$(awk -F: '/^user-db/ { print $2}' /etc/dconf/profile/user)
+    dirname="$HOME/.config/dconf"
+    if [ "$dbname" != "user" ] && ! [ -e "$dirname/$dbname" ]; then
+	find_candidates
+	for c in $CANDIDATES; do
+	    if [ -f "$dirname/user.$c" ]; then
+		cp "$dirname/user.$c" "$dirname/$dbname"
+		break
+	    fi
+	done
+	# If we don't end up copying anything, then the user just gets the
+	# defaults, which is fine.
+    fi
+fi
