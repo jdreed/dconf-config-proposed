@@ -1,28 +1,13 @@
 find_candidates() {
-    case "$(lsb_release -si)" in
-	Ubuntu)
-	    SEARCH="utopic trusty saucy raring quantal precise"
-	    ;;
-	Debian)
-	    SEARCH="jessie wheezy"
-	    ;;
-	*)
-	    SEARCH=
-	    ;;
-	esac
+    DISTROS=$(distro-info --all)
     looking=0
     CANDIDATES=
-    for s in $SEARCH; do
+    for s in $DISROS; do
 	# Do not consider anything that is newer than the current release
 	if [ "$(lsb_release -sc)" == "$s" ]; then
-	    looking=1
-	    # Do not consider the current release, since that's what we
-	    # need to populate
-	    continue
+	    break
 	fi
-	if [ $looking -eq 1 ]; then
-	    CANDIDATES="$CANDIDATES $s"
-	fi
+	CANDIDATES="$CANDIDATES $s"
     done
 }
 	
